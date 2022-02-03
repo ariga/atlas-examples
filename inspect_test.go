@@ -14,7 +14,7 @@ import (
 
 func TestInspect(t *testing.T) {
 	// Open a "connection" to sqlite.
-	db, err := sql.Open("sqlite3", "file:example.db?cache=shared&_fk=1&mode=memory")
+	db, err := sql.Open("sqlite3", "file:ent?mode=memory&cache=shared&_fk=1")
 	if err != nil {
 		log.Fatalf("failed opening db: %s", err)
 	}
