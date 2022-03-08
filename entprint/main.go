@@ -15,6 +15,13 @@ import (
 	_ "github.com/mattn/go-sqlite3"
 )
 
+// An example program that shows how to print the HCL representation of the database schema
+// of an Ent project. This example is a bit hacky, but it uses some useful features of the Ent
+// migration infrastructure to access the desired schema from within a `DiffHook`.
+//
+// In this example, we use `client.Schema.WriteTo` to direct the SQL output to `ioutil.Discard`, and
+// from within the DiffHook use `sqlite.MarshalHCL` to get the HCL representation of the desired schema.
+// Other drivers (MySQL, PostgreSQL) have similar MarshalHCL functions if you want to use those.
 func main() {
 	skip := errors.New("skipping")
 	client, err := ent.Open(dialect.SQLite, "file:ent?mode=memory&cache=shared&_fk=1")
@@ -32,6 +39,7 @@ func main() {
 					return nil, err
 				}
 				fmt.Println(string(hcl))
+				// skip the actual diffing:
 				return nil, skip
 			})
 		}),
