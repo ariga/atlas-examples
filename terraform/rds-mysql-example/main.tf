@@ -79,7 +79,7 @@ resource "aws_db_instance" "atlas-demo" {
   password               = random_password.password.result
   db_subnet_group_name   = aws_db_subnet_group.atlas.name
   vpc_security_group_ids = [aws_security_group.rds.id]
-  parameter_group_name   = "default.mysql5.7"
+  parameter_group_name   = "default.mysql8.0"
   publicly_accessible    = true
   skip_final_snapshot    = true
 }
