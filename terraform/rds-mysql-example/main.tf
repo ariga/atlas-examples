@@ -5,7 +5,7 @@ terraform {
       version = "~> 4.0"
     }
     atlas = {
-      source = "ariga/atlas"
+      source  = "ariga/atlas"
       version = "0.3.0-pre.1"
     }
   }
@@ -90,7 +90,7 @@ data "atlas_schema" "hello" {
 }
 
 resource "atlas_schema" "hello" {
-  hcl = data.atlas_schema.hello.hcl
+  hcl        = data.atlas_schema.hello.hcl
   dev_db_url = "mysql://root:pass@localhost:3306/example"
-  url = "mysql://${aws_db_instance.atlas-demo.username}:${urlencode(random_password.password.result)}@${aws_db_instance.atlas-demo.endpoint}/"
+  url        = "mysql://${aws_db_instance.atlas-demo.username}:${urlencode(random_password.password.result)}@${aws_db_instance.atlas-demo.endpoint}/"
 }
