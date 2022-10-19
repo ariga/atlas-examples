@@ -16,10 +16,12 @@ provider "aws" {
   region = "us-east-1"
 }
 
+// Fetch the list of availability zones from the current region.
 data "aws_availability_zones" "available" {
   state = "available"
 }
 
+// Provision a VPC and subnets in these AZs.
 module "vpc" {
   source  = "terraform-aws-modules/vpc/aws"
   version = "3.16.1"
@@ -32,6 +34,7 @@ module "vpc" {
   enable_dns_support   = true
 }
 
+// Create a DB subnet to provision the database.
 resource "aws_db_subnet_group" "atlas" {
   name       = "atlas-rds-demo"
   subnet_ids = module.vpc.public_subnets
@@ -41,11 +44,14 @@ resource "aws_db_subnet_group" "atlas" {
   }
 }
 
+// Generate a random password for our db user.
 resource "random_password" "password" {
   length  = 16
   special = true
 }
 
+// Security group which allows *public access* to our database.
+// DO NOT use this in production.
 resource "aws_security_group" "rds" {
   name   = "atlas-demo"
   vpc_id = module.vpc.vpc_id
@@ -69,6 +75,7 @@ resource "aws_security_group" "rds" {
   }
 }
 
+// Our RDS-based MySQL 8 instance.
 resource "aws_db_instance" "atlas-demo" {
   identifier             = "atlas-demo"
   instance_class         = "db.t3.micro"
@@ -84,13 +91,19 @@ resource "aws_db_instance" "atlas-demo" {
   skip_final_snapshot    = true
 }
 
-data "atlas_schema" "hello" {
+locals {
   dev_db_url = "mysql://root:pass@localhost:3306/example"
+}
+
+// Load the schema from file and normalize it using the dev database.
+data "atlas_schema" "hello" {
+  dev_db_url = local.dev_db_url
   src        = file("schema.hcl")
 }
 
+// Apply the normalized schema to the RDS-managed database.
 resource "atlas_schema" "hello" {
   hcl        = data.atlas_schema.hello.hcl
-  dev_db_url = "mysql://root:pass@localhost:3306/example"
+  dev_db_url = local.dev_db_url
   url        = "mysql://${aws_db_instance.atlas-demo.username}:${urlencode(random_password.password.result)}@${aws_db_instance.atlas-demo.endpoint}/"
 }
