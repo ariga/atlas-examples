@@ -1,4 +1,4 @@
-### Example for versioned migration using SQL schema
+### Example for declarative migrations using SQL schema
 
 1\. Log in using `atlas login`.
 
