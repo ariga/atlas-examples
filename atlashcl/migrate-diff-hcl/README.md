@@ -1,4 +1,4 @@
-### Example for declarative migrations using HCL schema
+### Example for versioned migrations using HCL schema
 
 1\. Log in using `atlas login`.
 
