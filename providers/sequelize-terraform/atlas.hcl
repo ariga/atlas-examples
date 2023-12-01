@@ -4,13 +4,13 @@ data "external_schema" "sequelize" {
         "@ariga/atlas-provider-sequelize",
         "load",
         "--path", "./model",
-        "--dialect", "mysql", // mariadb | postgres | sqlite | mssql
+        "--dialect", "postgres", // mariadb | postgres | sqlite | mssql
     ]
 }
 
 env "sequelize" {
     src = data.external_schema.sequelize.url
-    dev = "docker://mysql/8/dev"
+    dev = "docker://postgres/15/dev"
     migration {
         dir = "file://migrations"
     }
