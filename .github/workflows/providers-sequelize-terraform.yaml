@@ -43,7 +43,7 @@ jobs:
         with:
           dir: 'file://providers/sequelize/migrations'
           dir-name: 'sequelize'
-          dev-url: 'mysql://root:pass@mysql:3306/dev'
+          dev-url: "mysql://root:pass@localhost:3306/dev"
         env:
           GITHUB_TOKEN: ${{ github.token }}
       - uses: ariga/atlas-action/migrate/push@v1
@@ -51,5 +51,7 @@ jobs:
         with:
           dir: 'file://atlashcl/gcp-secrets/migrations'
           dir-name: 'sequelize'
-          dev-url: 'mysql://root:pass@mysql:3306/dev'
+          dev-url: "mysql://root:pass@localhost:3306/dev"
+
+
 
