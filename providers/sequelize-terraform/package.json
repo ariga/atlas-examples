@@ -1,0 +1,24 @@
+{
+  "name": "zenqms-sequelize-demo",
+  "version": "1.0.0",
+  "description": "e2e sequelize schema management",
+  "main": "index.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/ariga/atlas-examples.git"
+  },
+  "author": "",
+  "license": "ISC",
+  "bugs": {
+    "url": "https://github.com/ariga/atlas-examples/issues"
+  },
+  "homepage": "https://github.com/ariga/atlas-examples#readme",
+  "dependencies": {
+    "@ariga/atlas-provider-sequelize": "^0.1.1",
+    "sequelize": "^6.35.1",
+    "sqlite3": "^5.1.6"
+  }
+}
