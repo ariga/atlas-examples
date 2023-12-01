@@ -41,7 +41,7 @@ jobs:
           cloud-token: ${{ secrets.ATLAS_CLOUD_TOKEN }}
       - uses: ariga/atlas-action/migrate/lint@v1
         with:
-          dir: 'file://providers/sequelize/migrations'
+          dir: 'file://providers/sequelize-terraform/migrations'
           dir-name: 'sequelize'
           dev-url: "mysql://root:pass@localhost:3306/dev"
         env:
