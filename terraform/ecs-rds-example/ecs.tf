@@ -13,11 +13,12 @@ module "ecs" {
   }
 }
 
+# The API token for Atlas Cloud
 data "aws_secretsmanager_secret" "atlas-cloud" {
   name = "atlas-cloud-token"
 }
 
-
+# The ECS task definition
 resource "aws_ecs_task_definition" "this" {
   container_definitions = jsonencode([
     {
@@ -25,6 +26,7 @@ resource "aws_ecs_task_definition" "this" {
       image      = "arigaio/atlas:latest-alpine",
       essential  = false,
       entryPoint = ["sh", "-c"],
+      # First create the atlas.hcl file, then run the migration with atlas.
       command    = ["echo 'env { \n name = atlas.env \n url = getenv(\"ATLAS_DB_URL\") \n }' > atlas.hcl && ./atlas migrate apply --env prod --dir atlas://workshop-demo", ]
       secrets = [
         { name = "ATLAS_DB_URL", valueFrom = aws_secretsmanager_secret.db_url.arn },
@@ -51,6 +53,7 @@ resource "aws_ecs_task_definition" "this" {
         retries     = 3,
         startPeriod = 30
       },
+      # Only start the backend container after the atlas container has successfully ran.
       depends_on = [
         {
           container_name = "atlas",
@@ -116,5 +119,3 @@ resource "aws_iam_role_policy_attachment" "secretsmanager_read" {
   role       = module.ecs.task_exec_iam_role_name
   policy_arn = aws_iam_policy.secretsmanager_read.arn
 }
-
-# Add the secret as an environment variable in the task defi
