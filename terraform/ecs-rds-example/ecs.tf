@@ -1,8 +1,8 @@
 module "ecs" {
-  cluster_name               = "atlasdemo"
-  source                     = "terraform-aws-modules/ecs/aws"
-  version                    = "5.7.4"
-  create_task_exec_iam_role  = true
+  cluster_name              = "atlasdemo"
+  source                    = "terraform-aws-modules/ecs/aws"
+  version                   = "5.7.4"
+  create_task_exec_iam_role = true
   fargate_capacity_providers = {
     FARGATE = {
       default_capacity_provider_strategy = {
@@ -11,12 +11,6 @@ module "ecs" {
       }
     }
   }
-}
-
-locals {
-  command = <<EOF
-  echo 'env { name = atlas.env \n url = getenv("ATLAS_DB_URL") \n }' > atlas.hcl"
-  EOF
 }
 
 data "aws_secretsmanager_secret" "atlas-cloud" {
@@ -31,14 +25,14 @@ resource "aws_ecs_task_definition" "this" {
       image      = "arigaio/atlas:latest-alpine",
       essential  = false,
       entryPoint = ["sh", "-c"],
-      command    = ["echo 'env { \n name = atlas.env \n url = getenv(\"ATLAS_DB_URL\") \n }' > atlas.hcl && ./atlas migrate apply --env prod --dir atlas://workshop-demo",]
-      secrets    = [
+      command    = ["echo 'env { \n name = atlas.env \n url = getenv(\"ATLAS_DB_URL\") \n }' > atlas.hcl && ./atlas migrate apply --env prod --dir atlas://workshop-demo", ]
+      secrets = [
         { name = "ATLAS_DB_URL", valueFrom = aws_secretsmanager_secret.db_url.arn },
         { name = "ATLAS_TOKEN", valueFrom = data.aws_secretsmanager_secret.atlas-cloud.arn }
       ],
       logConfiguration = {
         logDriver = "awslogs",
-        options   = {
+        options = {
           awslogs-group         = module.ecs.cloudwatch_log_group_name
           awslogs-region        = "us-east-1",
           awslogs-stream-prefix = "ecs"
@@ -50,7 +44,7 @@ resource "aws_ecs_task_definition" "this" {
       image        = "nginx:latest",
       name         = "backend",
       portMappings = [{ containerPort = 80 }],
-      healthCheck  = {
+      healthCheck = {
         command     = ["CMD-SHELL", "curl -f http://localhost:80 || exit 1 "],
         interval    = 30,
         timeout     = 5,
@@ -65,7 +59,7 @@ resource "aws_ecs_task_definition" "this" {
       ]
       logConfiguration = {
         logDriver = "awslogs",
-        options   = {
+        options = {
           awslogs-group         = module.ecs.cloudwatch_log_group_name
           awslogs-region        = "us-east-1",
           awslogs-stream-prefix = "ecs"
@@ -106,7 +100,7 @@ resource "aws_iam_policy" "secretsmanager_read" {
   description = "Allows reading secrets from Secrets Manager"
 
   policy = jsonencode({
-    Version   = "2012-10-17",
+    Version = "2012-10-17",
     Statement = [
       {
         Action   = "secretsmanager:GetSecretValue",
