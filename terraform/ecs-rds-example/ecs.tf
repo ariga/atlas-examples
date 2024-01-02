@@ -18,6 +18,11 @@ data "aws_secretsmanager_secret" "atlas-cloud" {
   name = "atlas-cloud-token"
 }
 
+locals {
+  tag = var.tag != "" ? "?tag=${var.tag}" : ""
+  target = "atlas://${var.dir}${local.tag}"
+}
+
 # The ECS task definition
 resource "aws_ecs_task_definition" "this" {
   container_definitions = jsonencode([
@@ -27,7 +32,7 @@ resource "aws_ecs_task_definition" "this" {
       essential  = false,
       entryPoint = ["sh", "-c"],
       # First create the atlas.hcl file, then run the migration with atlas.
-      command    = ["echo 'env { \n name = atlas.env \n url = getenv(\"ATLAS_DB_URL\") \n }' > atlas.hcl && ./atlas migrate apply --env prod --dir atlas://workshop-demo", ]
+      command    = ["echo 'env { \n name = atlas.env \n url = getenv(\"ATLAS_DB_URL\") \n }' > atlas.hcl && ./atlas migrate apply --env prod --dir ${local.target}", ]
       secrets = [
         { name = "ATLAS_DB_URL", valueFrom = aws_secretsmanager_secret.db_url.arn },
         { name = "ATLAS_TOKEN", valueFrom = data.aws_secretsmanager_secret.atlas-cloud.arn }
