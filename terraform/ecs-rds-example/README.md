@@ -14,8 +14,6 @@ as those are pushed to Atlas Cloud by your delivery pipeline.
 * A migration directory pushed to Atlas Cloud.
   See [here](https://atlasgo.io/versioned/intro#pushing-migrations-to-atlas) for more information.
 
-This setup assumes that you have an existing Atlas Cloud account and have created a
-
 ## Setup
 
 Create a secret that will contain your Atlas Cloud token:
