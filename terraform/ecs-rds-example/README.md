@@ -3,7 +3,7 @@
 This example contains a Terraform configuration to provision an RDS MySQL database and a backend application 
 running on AWS ECS (Fargate) which uses Atlas Cloud to manage its database migrations.
 
-One of it's main advantages is that it avoids needing to build a custom container for database migrations
+One of its main advantages is that it avoids needing to build a custom container for database migrations
 as those are pushed to Atlas Cloud by your delivery pipeline. 
 
 ## Pre-requisites
