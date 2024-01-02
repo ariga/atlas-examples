@@ -1,20 +1,20 @@
 ### Terraform + ECS (Fargate) + RDS + Atlas Cloud Example
 
-This example contains a Terraform configuration to provision an RDS MySQL database and a backend application 
+This example contains a Terraform configuration to provision an RDS MySQL database and a backend application
 running on AWS ECS (Fargate) which uses Atlas Cloud to manage its database migrations.
 
 One of its main advantages is that it avoids needing to build a custom container for database migrations
-as those are pushed to Atlas Cloud by your delivery pipeline. 
+as those are pushed to Atlas Cloud by your delivery pipeline.
 
 ## Pre-requisites
 
 * An AWS account
 * An Atlas Cloud account (sign up [here](https://auth.atlasgo.cloud/signup))
 * An Atlas Cloud [Bot Token](https://atlasgo.io/cloud/bots).
-* A migration directory pushed to Atlas Cloud. See [here](https://atlasgo.io/versioned/intro#pushing-migrations-to-atlas) for more information.
+* A migration directory pushed to Atlas Cloud.
+  See [here](https://atlasgo.io/versioned/intro#pushing-migrations-to-atlas) for more information.
 
-This setup assumes that you have an existing Atlas Cloud account and have created a 
-
+This setup assumes that you have an existing Atlas Cloud account and have created a
 
 ## Setup
 
@@ -39,8 +39,3 @@ To deploy the infrastructure, run:
 ```bash
 terraform apply -var dir="<your_migration_dir>" -var tag="<revision_tag>"
 ```
-
-
-
-
-
