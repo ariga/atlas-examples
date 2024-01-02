@@ -1,6 +1,6 @@
 ### Terraform + ECS (Fargate) + RDS + Atlas Cloud Example
 
-This example contains  a Terraform configuration to providion an RDS MySQL database and a backend application 
+This example contains a Terraform configuration to provision an RDS MySQL database and a backend application 
 running on AWS ECS (Fargate) which uses Atlas Cloud to manage its database migrations.
 
 One of it's main advantages is that it avoids needing to build a custom container for database migrations
