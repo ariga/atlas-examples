@@ -24,6 +24,6 @@ jobs:
           GITHUB_TOKEN: ${{ github.token }}
         with:
           working-directory: orms/sequelize/declarative
-          url: ${{ secrets.NEON_CONNECTION }}
+          url: ${{ secrets.SEQUELIZE_NEON_URL }}
           env: prod
           to: "atlas://sequelize-declarative-demo/?tag=${{ github.event.inputs.tag }}"
