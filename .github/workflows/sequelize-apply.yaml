@@ -1,0 +1,29 @@
+name: "Sequelize: Deploy Declarative"
+on:
+  workflow_dispatch:
+    inputs:
+      tag:
+        description: 'Tag to deploy'
+        required: true
+        default: 'latest'
+permissions:
+  contents: read
+  pull-requests: write
+jobs:
+  deploy:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - name: Setup Atlas
+        uses: ariga/setup-atlas@master
+        with:
+          cloud-token: ${{ secrets.ATLAS_TOKEN_R85 }}
+      - name: Run schema apply
+        uses: ariga/atlas-action/schema/apply@master
+        env:
+          GITHUB_TOKEN: ${{ github.token }}
+        with:
+          working-directory: orms/sequelize/declarative
+          url: ${{ secrets.NEON_CONNECTION }}
+          env: prod
+          to: "atlas://sequelize-declarative-demo/?tag=${{ github.event.inputs.tag }}"
