@@ -6,11 +6,11 @@ on:
       - master
     paths:
       - .github/workflows/sequelize-plan.yaml
-      - 'orms/sequelize/declarative/*'
+      - 'orms/sequelize/declarative/**/*'
   pull_request:
     paths:
       - .github/workflows/sequelize-plan.yaml
-      - 'orms/sequelize/declarative/*'
+      - 'orms/sequelize/declarative/**/*'
 permissions:
   contents: read
   pull-requests: write
@@ -31,8 +31,6 @@ jobs:
         uses: ariga/setup-atlas@master
         with:
           cloud-token: ${{ secrets.ATLAS_TOKEN_R85 }}
-      - name: check who ami
-        run: atlas whoami
       - name: Run schema plan
         uses: ariga/atlas-action/schema/plan@master
         env:
