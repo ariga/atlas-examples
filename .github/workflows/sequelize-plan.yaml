@@ -1,0 +1,76 @@
+name: "Sequelize: Plan Declarative Migrations"
+on:
+  workflow_dispatch:
+  push:
+    branches:
+      - master
+    paths:
+      - .github/workflows/sequelize-plan.yaml
+      - 'orms/sequelize/declarative/*'
+  pull_request:
+    paths:
+      - .github/workflows/sequelize-plan.yaml
+      - 'orms/sequelize/declarative/*'
+permissions:
+  contents: read
+  pull-requests: write
+jobs:
+  plan:
+    name: plan
+    if: ${{ github.event_name == 'pull_request' }}
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - name: Set up Node
+        uses: actions/setup-python@v4
+      - name: Install dependencies
+        working-directory: orms/sequelize/declarative
+        run: |
+          npm ci
+      - name: Setup Atlas
+        uses: ariga/setup-atlas@master
+        with:
+          cloud-token: ${{ secrets.ATLAS_TOKEN_R85 }}
+      - name: check who ami
+        run: atlas whoami
+      - name: Run schema plan
+        uses: ariga/atlas-action/schema/plan@master
+        env:
+          GITHUB_TOKEN: ${{ github.token }}
+        with:
+          working-directory: orms/sequelize/declarative
+          from: ${{ secrets.SEQUELIZE_NEON_URL }}
+          env: ci
+  approve-push:
+    name: approve-push
+    if: ${{ github.event_name == 'push' && github.ref == 'refs/heads/master' }}
+    runs-on: ubuntu-latest
+    env:
+      GITHUB_TOKEN: ${{ github.token }}
+    steps:
+      - uses: actions/checkout@v4
+      - name: Set up Node
+        uses: actions/setup-node@v4
+      - name: Install dependencies
+        working-directory: orms/sequelize/declarative
+        run: |
+            npm ci
+      - name: Setup Atlas
+        uses: ariga/setup-atlas@v0
+        with:
+          cloud-token: ${{ secrets.ATLAS_TOKEN_R85 }}
+      # Plan against the latest schema state (one before the PR).
+      - name: Approve the plan
+        id: plan-approve
+        uses: ariga/atlas-action/schema/plan/approve@master
+        with:
+          env: ci
+          working-directory: orms/sequelize/declarative
+          from: ${{ secrets.SEQUELIZE_NEON_URL }}
+      # Push the schema after the plan is approved.
+      - name: Push the schema
+        id: schema-push
+        uses: ariga/atlas-action/schema/push@master
+        with:
+          env: ci
+          working-directory: orms/sequelize/declarative
