@@ -57,7 +57,6 @@ jobs:
         uses: ariga/setup-atlas@v0
         with:
           cloud-token: ${{ secrets.ATLAS_TOKEN_R85 }}
-      # Plan against the latest schema state (one before the PR).
       - name: Approve the plan
         id: plan-approve
         uses: ariga/atlas-action/schema/plan/approve@master
