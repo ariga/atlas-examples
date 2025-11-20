@@ -1,0 +1,64 @@
+version: 2.1
+
+orbs:
+  atlas-orb: ariga/atlas-orb@0.3.1
+
+jobs:
+  plan-schema-changes:
+    docker:
+      - image: cimg/base:current
+      - image: cimg/postgres:15.0
+        environment:
+          POSTGRES_DB: postgres
+          POSTGRES_USER: postgres
+          POSTGRES_PASSWORD: postgres
+    steps:
+      - checkout
+      - run:
+          name: Wait for Postgres
+          command: dockerize -wait tcp://127.0.0.1:5432 -timeout 60s
+      - atlas-orb/setup:
+          version: "latest"
+      - atlas-orb/schema_plan:
+          env: dev
+          dev_url: postgres://postgres:postgres@localhost:5432/postgres?sslmode=disable&search_path=public
+
+  deploy-schema-changes:
+    docker:
+      - image: cimg/base:current
+      - image: cimg/postgres:15.0
+        environment:
+          POSTGRES_DB: postgres
+          POSTGRES_USER: postgres
+          POSTGRES_PASSWORD: postgres
+    steps:
+      - checkout
+      - run:
+          name: Wait for Postgres
+          command: dockerize -wait tcp://127.0.0.1:5432 -timeout 60s
+      - atlas-orb/setup:
+          version: "latest"
+      - atlas-orb/schema_plan_approve:
+          env: dev
+          dev_url: postgres://postgres:postgres@localhost:5432/postgres?sslmode=disable&search_path=public
+      - atlas-orb/schema_push:
+          env: dev
+          dev_url: postgres://postgres:postgres@localhost:5432/postgres?sslmode=disable&search_path=public
+      - atlas-orb/schema_apply:
+          env: dev
+          dev_url: postgres://postgres:postgres@localhost:5432/postgres?sslmode=disable&search_path=public
+
+workflows:
+  version: 2
+  atlas-workflow:
+    jobs:
+      - plan-schema-changes:
+          context: dev
+          filters:
+            branches:
+              ignore: main
+      - deploy-schema-changes:
+          context: dev
+          filters:
+            branches:
+              only: main
