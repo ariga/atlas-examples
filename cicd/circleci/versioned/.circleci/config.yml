@@ -1,0 +1,62 @@
+version: 2.1
+
+orbs:
+  atlas-orb: ariga/atlas-orb@0.3.1
+
+jobs:
+  lint-migrations:
+    docker:
+      - image: cimg/base:current
+      - image: cimg/postgres:15.0
+        environment:
+          POSTGRES_DB: postgres
+          POSTGRES_USER: postgres
+          POSTGRES_PASSWORD: postgres
+    steps:
+      - checkout
+      - run:
+          name: Wait for Postgres
+          command: dockerize -wait tcp://127.0.0.1:5432 -timeout 60s
+      - atlas-orb/setup:
+          version: "latest"
+      - atlas-orb/migrate_lint:
+          env: dev
+          dir_name: "circleci-atlas-action-versioned-demo"
+          dev_url: "postgres://postgres:postgres@localhost:5432/postgres?sslmode=disable&search_path=public"
+
+  push-and-apply-migrations:
+    docker:
+      - image: cimg/base:current
+      - image: cimg/postgres:15.0
+        environment:
+          POSTGRES_DB: postgres
+          POSTGRES_USER: postgres
+          POSTGRES_PASSWORD: postgres
+    steps:
+      - checkout
+      - run:
+          name: Wait for Postgres
+          command: dockerize -wait tcp://127.0.0.1:5432 -timeout 60s
+      - atlas-orb/setup:
+          version: "latest"
+      - atlas-orb/migrate_push:
+          env: dev
+          dir_name: "circleci-atlas-action-versioned-demo"
+          dev_url: "postgres://postgres:postgres@localhost:5432/postgres?sslmode=disable&search_path=public"
+      - atlas-orb/migrate_apply:
+          env: dev
+          dir: "atlas://circleci-atlas-action-versioned-demo"
+workflows:
+  version: 2
+  atlas-workflow:
+    jobs:
+      - lint-migrations:
+          context: dev
+          filters:
+            branches:
+              ignore: main
+      - push-and-apply-migrations:
+          context: dev
+          filters:
+            branches:
+              ignore: main
