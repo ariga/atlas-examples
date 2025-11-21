@@ -1,0 +1,79 @@
+# This is an example Starter pipeline configuration
+# Use a skeleton to build, test and deploy using manual and parallel steps
+# -----
+# You can specify a custom docker image from Docker Hub as your build environment.
+
+image: atlassian/default-image:3
+
+
+# List of available ATLAS_ACTION can be found at:
+# https://github.com/ariga/atlas-action
+#
+# For input variables, please refer to the README.md of the action
+# then add the prefix `ATLAS_INPUT_` to the input name.
+#
+# For example, if the input name is `working-directory`, then the variable name should be `ATLAS_INPUT_WORKING_DIRECTORY`
+# The output will be saved in the file `.atlas-action/outputs.sh` and can be sourced to get the output variables
+# And the directory can be changed by setting the `ATLAS_OUTPUT_DIR` variable.
+#
+# The `ATLAS_TOKEN` is required for all actions.
+definitions:
+  services:
+    # Run Postgres database to simulate the production database
+    # This is only for demo purposes.
+    # We can replace this with the proxy to connect to the production database.
+    fake-db:
+      image: postgres:15
+      environment:
+        POSTGRES_DB: postgres
+        POSTGRES_USER: postgres
+        POSTGRES_PASSWORD: postgres
+  commonItems:
+    atlas-action-variables: &atlasVars
+      ATLAS_TOKEN: $ATLAS_TOKEN # Required
+      # The action_token is required to comment on the PR
+      # It must have Pull requests/Write permission
+      BITBUCKET_ACCESS_TOKEN: $BITBUCKET_ACCESS_TOKEN
+      # To connect to the service running outside the pipeline,
+      # we need to use the host.docker.internal to connect to the host machine
+      DATABASE_URL: postgres://postgres:postgres@host.docker.internal:5432/postgres?sslmode=disable&search_path=public
+pipelines:
+  pull-requests:
+    '**':
+      - step:
+          name: 'Lint Migrations'
+          script:
+            - name: Lint migrations
+              pipe: docker://arigaio/atlas-action:master
+              variables:
+                <<: *atlasVars
+                ATLAS_ACTION: migrate/lint # Required
+                ATLAS_INPUT_ENV: dev
+                ATLAS_INPUT_DIR_NAME: "bitbucket-atlas-action-versioned-demo"
+            - cat .atlas-action/outputs.sh
+            - source .atlas-action/outputs.sh
+          services:
+            - fake-db
+  branches:
+    master:
+      - step:
+          name: 'Push and Apply Migrations'
+          script:
+            - name: Push migrations
+              pipe: docker://arigaio/atlas-action:master
+              variables:
+                <<: *atlasVars
+                ATLAS_ACTION: migrate/push # Required
+                ATLAS_INPUT_ENV: dev
+                ATLAS_INPUT_DIR_NAME: "bitbucket-atlas-action-versioned-demo"
+            - name: Apply migrations
+              pipe: docker://arigaio/atlas-action:master
+              variables:
+                <<: *atlasVars
+                ATLAS_ACTION: migrate/apply # Required
+                ATLAS_INPUT_ENV: dev
+                ATLAS_INPUT_DIR: "atlas://bitbucket-atlas-action-versioned-demo"
+            - cat .atlas-action/outputs.sh
+            - source .atlas-action/outputs.sh
+          services:
+            - fake-db
